@@ -17,8 +17,16 @@ const PORT = 3000;
 
 app.use(express.json());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`[Server] ${req.method} request received at ${req.url}`);
+  next();
+});
+
 // In-Memory & File-Based Database for High Durability
-const DB_FILE = path.join(__dirname, "db_store.json");
+const DB_FILE = process.env.VERCEL 
+  ? path.join("/tmp", "db_store.json") 
+  : path.join(__dirname, "db_store.json");
 
 interface Job {
   id: string;
@@ -53,16 +61,25 @@ interface DBState {
 
 // Initial database seeding if file doesn't exist
 function initDB(): DBState {
+  const defaultState: DBState = { jobs: [], logs: [] };
   if (fs.existsSync(DB_FILE)) {
     try {
       const data = fs.readFileSync(DB_FILE, "utf-8");
-      return JSON.parse(data);
+      if (data.trim()) {
+        const parsed = JSON.parse(data);
+        if (parsed && Array.isArray(parsed.jobs) && Array.isArray(parsed.logs)) {
+          return parsed;
+        }
+      }
     } catch (e) {
       console.error("Error reading database file, resetting...", e);
     }
   }
-  const defaultState: DBState = { jobs: [], logs: [] };
-  fs.writeFileSync(DB_FILE, JSON.stringify(defaultState, null, 2), "utf-8");
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(defaultState, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Failed to write initial db_store.json file, continuing with in-memory DB", err);
+  }
   return defaultState;
 }
 
@@ -543,6 +560,8 @@ async function runAgentOrchestrator(jobId: string) {
       planOutput = getSimulatedAgentResponse('PLANNER', job.title);
     }
 
+    if (!db.jobs.some(j => j.id === jobId)) return;
+
     job.planOutput = planOutput;
     job.currentAgent = null;
     saveDB();
@@ -570,13 +589,13 @@ async function runAgentOrchestrator(jobId: string) {
 
       if (isGeminiEnabled) {
         try {
-          const engineerSystem = "You are a senior software engineer. Your task is to write clean, complete, production-ready TypeScript/React code based on the implementation plan. Follow Tailwind CSS guidelines and import icons from 'lucide-react'. Write standard TypeScript file blocks. Your output MUST include file name comment as '// filename: src/components/FeatureView.tsx' followed by source code. Do not use generic TODOs.";
+          const textPlannerPrompt = "You are a senior software engineer. Your task is to write clean, complete, production-ready TypeScript/React code based on the implementation plan. Follow Tailwind CSS guidelines and import icons from 'lucide-react'. Write standard TypeScript file blocks. Your output MUST include file name comment as '// filename: src/components/FeatureView.tsx' followed by source code. Do not use generic TODOs.";
           let engineerUserPrompt = `Implementation Plan specification:\n${planOutput}\n\nFeature Request: ${featureRequest}`;
           if (iteration > 0) {
             engineerUserPrompt += `\n\nPrevious review comments to correct:\n${reviewOutput}`;
           }
           writeLog(jobId, 'ENGINEER', 'Engineer Agent', `💻 Synthesizing component code using Gemini...`);
-          currentCode = await triggerGeminiAgent('ENGINEER', engineerSystem, engineerUserPrompt);
+          currentCode = await triggerGeminiAgent('ENGINEER', textPlannerPrompt, engineerUserPrompt);
         } catch (geminiErr: any) {
           writeLog(jobId, 'ENGINEER', 'Engineer Agent', `⚠️ Gemini API disruption: ${geminiErr.message || 'Unavailable'}. Falling back safely to local sandbox code compiler...`, 'INFO');
           await new Promise(resolve => setTimeout(resolve, 1500));
@@ -587,12 +606,15 @@ async function runAgentOrchestrator(jobId: string) {
         currentCode = getSimulatedAgentResponse(iteration === 0 ? 'ENGINEER' : 'ENGINEER_REVISION', job.title, iteration);
       }
 
+      if (!db.jobs.some(j => j.id === jobId)) return;
+
       job.codeOutput = currentCode;
       saveDB();
       writeLog(jobId, 'ENGINEER', 'Engineer Agent', `💻 Completed code file integration. Submitting PR output to Reviewer...`, 'INFO');
       writeLog(jobId, 'ENGINEER', 'Engineer Agent', `💻 **Draft Code Created (Iteration ${iteration + 1})**:\n\n${currentCode}`, 'BAND_MESSAGE');
 
       // STAGE 3: CODE REVIEW
+      if (!db.jobs.some(j => j.id === jobId)) return;
       job.status = 'REVIEWING';
       job.currentAgent = 'REVIEWER';
       saveDB();
@@ -614,6 +636,8 @@ async function runAgentOrchestrator(jobId: string) {
         await new Promise(resolve => setTimeout(resolve, 2000));
         reviewOutput = getSimulatedAgentResponse('REVIEWER', job.title, iteration);
       }
+
+      if (!db.jobs.some(j => j.id === jobId)) return;
 
       job.reviewOutput = reviewOutput;
       saveDB();
@@ -664,6 +688,8 @@ async function runAgentOrchestrator(jobId: string) {
       testSuite = getSimulatedAgentResponse('TESTER', job.title);
     }
 
+    if (!db.jobs.some(j => j.id === jobId)) return;
+
     job.testOutput = testSuite;
     saveDB();
 
@@ -673,6 +699,8 @@ async function runAgentOrchestrator(jobId: string) {
     // Virtual Test Runner Sandbox executes test suite
     await new Promise(resolve => setTimeout(resolve, 2000));
     
+    if (!db.jobs.some(j => j.id === jobId)) return;
+
     // Simulate test output parsing safely
     const mockTestContainerOutput = `
 PASS  test/FeatureView.test.tsx
@@ -722,6 +750,8 @@ All files       |     100 |      100 |     100 |     100 |
       await new Promise(resolve => setTimeout(resolve, 2000));
       documentation = getSimulatedAgentResponse('DOCWRITER', job.title);
     }
+
+    if (!db.jobs.some(j => j.id === jobId)) return;
 
     job.docOutput = documentation;
     job.status = 'COMPLETED';
@@ -866,9 +896,17 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 AgentFlow CI custom full-stack server running on http://localhost:${PORT}`);
-  });
+  // Only start standard listener if we are NOT running in the Vercel serverless function environment
+  if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 AgentFlow CI custom full-stack server running on http://localhost:${PORT}`);
+    });
+  }
 }
 
-startServer();
+// In standard serverless node environments like Vercel, the startServer invocation is bypassed
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;

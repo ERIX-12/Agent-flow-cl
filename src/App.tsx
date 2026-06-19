@@ -13,6 +13,7 @@ export default function App() {
   const [logs, setLogs] = useState<AgentLog[]>([]);
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDisconnected, setIsDisconnected] = useState(false);
 
   // Sync general database stats and specific active job logs
   const fetchState = async () => {
@@ -20,42 +21,59 @@ export default function App() {
       // 1. Fetch system parameter states
       const systemRes = await fetch("/api/system/status");
       if (systemRes.ok) {
-        const data = await systemRes.json();
-        setSystemStatus(data);
+        const contentType = systemRes.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await systemRes.json();
+          setSystemStatus(data);
+          setIsDisconnected(false);
+        }
       }
 
       // 2. Fetch list of recent pipeline runs
       const jobsRes = await fetch("/api/jobs");
       if (jobsRes.ok) {
-        const jobsData: Job[] = await jobsRes.json();
-        setJobs(jobsData);
-        
-        // Auto-select the first job if none selected yet
-        if (jobsData.length > 0 && !selectedJob) {
-          setSelectedJob(jobsData[0]);
+        const contentType = jobsRes.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const jobsData: Job[] = await jobsRes.json();
+          setJobs(jobsData);
+          setIsDisconnected(false);
+          
+          // Auto-select the first job if none selected yet
+          setSelectedJob(curr => {
+            if (jobsData.length > 0 && !curr) {
+              return jobsData[0];
+            }
+            return curr;
+          });
         }
       }
     } catch (err) {
-      console.error("Error fetching general database state", err);
+      setIsDisconnected(true);
+      // Soft warnings for transient offline/compiling statuses to avoid red console errors
+      console.warn("Connection with server temporarily interrupted (syncing database state). Retrying...", err);
     }
   };
 
   // Sync selected job details and its custom logs
-  const fetchSelectedJobDetails = async () => {
-    if (!selectedJob) return;
+  const fetchSelectedJobDetails = async (jobId: string) => {
     try {
-      const detailRes = await fetch(`/api/jobs/${selectedJob.id}`);
+      const detailRes = await fetch(`/api/jobs/${jobId}`);
       if (detailRes.ok) {
-        const data = await detailRes.json();
-        // Update both the selected job and the matching logs array
-        setSelectedJob(data.job);
-        setLogs(data.logs);
-        
-        // Update in list
-        setJobs(prevJobs => prevJobs.map(j => j.id === data.job.id ? data.job : j));
+        const contentType = detailRes.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await detailRes.json();
+          // Update both the selected job and the matching logs array
+          setSelectedJob(data.job);
+          setLogs(data.logs);
+          setIsDisconnected(false);
+          
+          // Update in list
+          setJobs(prevJobs => prevJobs.map(j => j.id === data.job.id ? data.job : j));
+        }
       }
     } catch (err) {
-      console.error("Error fetching job logs", err);
+      setIsDisconnected(true);
+      console.warn("Connection with server temporarily interrupted (syncing active job logs). Retrying...", err);
     }
   };
 
@@ -64,19 +82,21 @@ export default function App() {
     fetchState();
     const interval = setInterval(fetchState, 3000);
     return () => clearInterval(interval);
-  }, [selectedJob]);
+  }, []);
 
   // Poll active logs faster when selecting an active progressing job
   useEffect(() => {
-    fetchSelectedJobDetails();
-    let logPollInterval: any = null;
+    if (!selectedJob?.id) return;
+    const jobId = selectedJob.id;
+    const status = selectedJob.status;
+
+    fetchSelectedJobDetails(jobId);
     
     // Poll faster when job is actively planning, writing, reviewing, testing, or documenting
-    if (selectedJob && selectedJob.status !== 'COMPLETED' && selectedJob.status !== 'FAILED') {
-      logPollInterval = setInterval(fetchSelectedJobDetails, 1500);
-    } else {
-      logPollInterval = setInterval(fetchSelectedJobDetails, 4000);
-    }
+    const intervalMs = (status !== 'COMPLETED' && status !== 'FAILED') ? 1500 : 4000;
+    const logPollInterval = setInterval(() => {
+      fetchSelectedJobDetails(jobId);
+    }, intervalMs);
     
     return () => clearInterval(logPollInterval);
   }, [selectedJob?.id, selectedJob?.status]);
@@ -91,10 +111,13 @@ export default function App() {
         body: JSON.stringify({ title, featureRequest: specDetails }),
       });
       if (response.ok) {
-        const newJob = await response.json();
-        setSelectedJob(newJob);
-        setLogs([]); // Reset conversation pane for immediate progress mapping
-        await fetchState();
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const newJob = await response.json();
+          setSelectedJob(newJob);
+          setLogs([]); // Reset conversation pane for immediate progress mapping
+          await fetchState();
+        }
       }
     } catch (err) {
       console.error("Error submitting job request", err);
@@ -142,10 +165,17 @@ export default function App() {
 
         {/* Diagnostic capabilities banner */}
         <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-slate-300">5 Agents Live</span>
-          </div>
+          {isDisconnected ? (
+            <div className="flex items-center gap-1.5 text-xs text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="font-semibold">Reconnecting CI Gateway...</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-semibold text-slate-300">5 Agents Live</span>
+            </div>
+          )}
           
           <div className="flex items-center gap-1.5 text-xs text-slate-400 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">
             <Server className="w-3.5 h-3.5 text-blue-400" />
@@ -284,7 +314,7 @@ export default function App() {
             {selectedJob && (
               <div className="flex-1 min-h-0">
                 <JobDetail job={selectedJob} onRetry={async () => {
-                  await fetchSelectedJobDetails();
+                  await fetchSelectedJobDetails(selectedJob.id);
                   await fetchState();
                 }} />
               </div>
