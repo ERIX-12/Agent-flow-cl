@@ -12,6 +12,7 @@ export interface Job {
   iterationCount: number;
   createdAt: string;
   completedAt: string | null;
+  updatedAt?: string;
 }
 
 export interface AgentLog {

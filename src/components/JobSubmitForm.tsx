@@ -39,15 +39,15 @@ export default function JobSubmitForm({ onSubmit, isSubmitting }: JobSubmitFormP
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm shadow-slate-100">
       <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="w-5 h-5 text-blue-400" />
-        <h3 className="font-semibold text-slate-100 text-sm tracking-wide uppercase">New Agent Job</h3>
+        <Sparkles className="w-5 h-5 text-amber-500" />
+        <h3 className="font-extrabold text-slate-900 text-xs tracking-wider uppercase">New Agent Task</h3>
       </div>
 
-      <form onSubmit={handleFormSubmit} className="space-y-4">
+      <form onSubmit={handleFormSubmit} className="space-y-4 text-left">
         <div>
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Feature Title
           </label>
           <input 
@@ -57,12 +57,12 @@ export default function JobSubmitForm({ onSubmit, isSubmitting }: JobSubmitFormP
             onChange={(e) => setTitle(e.target.value)}
             disabled={isSubmitting}
             placeholder="e.g. D3 commit visualizer module"
-            className="w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 disabled:opacity-50 transition-colors"
+            className="w-full bg-[#fafafa]/80 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:opacity-50 transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
             Feature Request Specifications
           </label>
           <textarea
@@ -72,23 +72,23 @@ export default function JobSubmitForm({ onSubmit, isSubmitting }: JobSubmitFormP
             onChange={(e) => setRequest(e.target.value)}
             disabled={isSubmitting}
             placeholder="Describe the technical requirements, components, models, and outputs for the autonomous agents to build..."
-            className="w-full bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-blue-500 disabled:opacity-50 transition-colors resize-none"
+            className="w-full bg-[#fafafa]/80 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:opacity-50 transition-colors resize-none"
           />
         </div>
 
         <button
           type="submit"
           disabled={!title.trim() || !request.trim() || isSubmitting}
-          className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 font-medium text-sm text-white flex items-center justify-center gap-2 cursor-pointer transition-colors"
+          className="w-full py-2.5 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:bg-slate-100 disabled:text-slate-400 font-extrabold text-xs uppercase tracking-wider text-black flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-sm"
         >
           {isSubmitting ? (
             <>
-              <Terminal className="w-4 h-4 animate-spin text-blue-300" />
+              <Terminal className="w-4 h-4 animate-spin text-black" />
               <span>Orchestrator Triggered...</span>
             </>
           ) : (
             <>
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 text-black" />
               <span>Deploy Multi-Agent Pipeline</span>
             </>
           )}
@@ -97,8 +97,8 @@ export default function JobSubmitForm({ onSubmit, isSubmitting }: JobSubmitFormP
 
       {/* Showcase Suggestions */}
       {!isSubmitting && (
-        <div className="mt-5 pt-4 border-t border-slate-800/80">
-          <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+        <div className="mt-5 pt-4 border-t border-slate-100">
+          <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 text-left">
             Suggested Blueprint Templates
           </span>
           <div className="space-y-2">
@@ -106,9 +106,9 @@ export default function JobSubmitForm({ onSubmit, isSubmitting }: JobSubmitFormP
               <button
                 key={idx}
                 onClick={() => applyTemplate(item)}
-                className="w-full text-left p-2.5 rounded-lg bg-slate-950/40 border border-slate-900 hover:border-slate-800 hover:bg-slate-950/90 transition-all text-xs group"
+                className="w-full text-left p-2.5 rounded-lg bg-slate-50/50 border border-slate-150 hover:border-amber-500 hover:bg-amber-500/5 transition-all text-xs group"
               >
-                <div className="font-semibold text-slate-300 group-hover:text-blue-400 transition-colors">
+                <div className="font-bold text-slate-800 group-hover:text-amber-700 transition-colors">
                   {item.title}
                 </div>
                 <div className="text-slate-500 leading-normal mt-0.5 truncate">

@@ -9,8 +9,15 @@ import dotenv from "dotenv";
 // Load environment variables
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// @ts-ignore
+const resolvedFilename = (typeof import.meta !== "undefined" && import.meta.url)
+  ? fileURLToPath(import.meta.url)
+  : (typeof __filename !== "undefined" ? __filename : "");
+
+// @ts-ignore
+const resolvedDirname = (typeof import.meta !== "undefined" && import.meta.url)
+  ? path.dirname(resolvedFilename)
+  : (typeof __dirname !== "undefined" ? __dirname : process.cwd());
 
 const app = express();
 const PORT = 3000;
@@ -26,7 +33,7 @@ app.use((req, res, next) => {
 // In-Memory & File-Based Database for High Durability
 const DB_FILE = process.env.VERCEL 
   ? path.join("/tmp", "db_store.json") 
-  : path.join(__dirname, "db_store.json");
+  : path.join(resolvedDirname, "db_store.json");
 
 interface Job {
   id: string;
@@ -42,6 +49,7 @@ interface Job {
   iterationCount: number;
   createdAt: string;
   completedAt: string | null;
+  updatedAt?: string;
 }
 
 interface AgentLog {
@@ -757,6 +765,7 @@ All files       |     100 |      100 |     100 |     100 |
     job.status = 'COMPLETED';
     job.currentAgent = null;
     job.completedAt = new Date().toISOString();
+    job.updatedAt = job.completedAt;
     saveDB();
 
     writeLog(jobId, 'DOCWRITER', 'DocWriter Agent', `🎉 Release documentation compiled. Pull Request is now 100% ready for human engineer merging!`, 'INFO');
@@ -769,6 +778,8 @@ All files       |     100 |      100 |     100 |     100 |
       const liveJob = db.jobs[activeJobIndex];
       liveJob.status = 'FAILED';
       liveJob.currentAgent = null;
+      liveJob.completedAt = new Date().toISOString();
+      liveJob.updatedAt = liveJob.completedAt;
       saveDB();
       writeLog(jobId, 'DOCWRITER', 'DocWriter Agent', `❌ Pipeline process aborted due to fatal error: ${err.message}`, 'ERROR');
     }
@@ -784,6 +795,7 @@ app.post("/api/jobs", (req, res) => {
     return res.status(400).json({ error: "Title and feature request details are required." });
   }
 
+  const nowStr = new Date().toISOString();
   const newJob: Job = {
     id: `job-${Date.now()}`,
     title,
@@ -796,8 +808,9 @@ app.post("/api/jobs", (req, res) => {
     testOutput: "",
     docOutput: "",
     iterationCount: 0,
-    createdAt: new Date().toISOString(),
-    completedAt: null
+    createdAt: nowStr,
+    completedAt: null,
+    updatedAt: nowStr
   };
 
   db.jobs.unshift(newJob);

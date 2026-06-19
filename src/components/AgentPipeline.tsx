@@ -89,15 +89,15 @@ export default function AgentPipeline({ activeJob }: { activeJob: Job | null }) 
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl h-full flex flex-col justify-between">
+    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm shadow-slate-100 h-full flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-blue-400" />
-            <span className="font-semibold text-slate-100 text-sm tracking-wide uppercase">Pipeline Pipeline Map</span>
+            <Layers className="w-5 h-5 text-amber-500" />
+            <span className="font-extrabold text-slate-900 text-xs tracking-wider uppercase">Pipeline Process Map</span>
           </div>
           {activeJob && (
-            <div className="text-[11px] font-bold text-slate-500 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800">
+            <div className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2.5 py-0.5 rounded-full border border-slate-200">
               Run: {activeJob.id}
             </div>
           )}
@@ -109,13 +109,13 @@ export default function AgentPipeline({ activeJob }: { activeJob: Job | null }) 
             const isLast = index === AGENT_STEPS.length - 1;
 
             return (
-              <div key={step.id} className="relative">
+              <div key={step.id} className="relative text-left">
                 {/* Connecting Line */}
                 {!isLast && (
-                  <div className="absolute left-6 top-12 w-0.5 h-6 -ml-[1px] bg-slate-800">
+                  <div className="absolute left-6 top-12 w-0.5 h-6 -ml-[1px] bg-slate-100">
                     <div 
                       className={`h-full w-full transition-all duration-700 ${
-                        status === 'completed' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-800'
+                        status === 'completed' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]' : 'bg-slate-100'
                       }`}
                     />
                   </div>
@@ -125,23 +125,23 @@ export default function AgentPipeline({ activeJob }: { activeJob: Job | null }) 
                 <div 
                   className={`flex items-start gap-4 p-3.5 rounded-xl border transition-all duration-300 ${
                     status === 'active' 
-                      ? 'border-blue-500/80 bg-blue-500/5 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+                      ? 'border-amber-500 bg-amber-500/5 shadow-sm' 
                       : status === 'completed'
-                      ? 'border-emerald-500/30 bg-emerald-500/5'
+                      ? 'border-emerald-200 bg-emerald-500/5'
                       : status === 'failed'
-                      ? 'border-rose-500 bg-rose-500/5'
-                      : 'border-slate-800 bg-slate-950/40 text-slate-500'
+                      ? 'border-rose-300 bg-rose-500/5'
+                      : 'border-slate-100 bg-[#fafafa]/80 text-slate-400'
                   }`}
                 >
                   {/* Status Node Icon */}
                   <div className={`p-2 rounded-lg shrink-0 ${
                     status === 'active' 
-                      ? 'bg-blue-500/20 text-blue-400' 
+                      ? 'bg-amber-100 text-amber-700' 
                       : status === 'completed'
-                      ? 'bg-emerald-500/20 text-emerald-400'
+                      ? 'bg-emerald-100 text-emerald-700'
                       : status === 'failed'
-                      ? 'bg-rose-500/20 text-rose-400'
-                      : 'bg-slate-900 text-slate-600'
+                      ? 'bg-rose-100 text-rose-700'
+                      : 'bg-slate-100 text-slate-400'
                   }`}>
                     {step.emoji}
                   </div>
@@ -149,43 +149,43 @@ export default function AgentPipeline({ activeJob }: { activeJob: Job | null }) 
                   {/* Body Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className={`text-sm font-semibold tracking-wide ${status === 'active' ? 'text-blue-400 font-bold' : status === 'completed' ? 'text-slate-300' : status === 'failed' ? 'text-rose-400' : 'text-slate-500'}`}>
+                      <span className={`text-xs font-bold tracking-wide ${status === 'active' ? 'text-amber-700' : status === 'completed' ? 'text-slate-800' : status === 'failed' ? 'text-rose-700' : 'text-slate-600'}`}>
                         {step.name}
                       </span>
                       
                       {/* Sub-status Labels */}
                       <div className="flex items-center gap-1.5">
                         {status === 'active' && (
-                          <span className="flex items-center gap-1 text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold animate-pulse">
-                            <Loader className="w-3 h-3 animate-spin" /> Active
+                          <span className="flex items-center gap-1 text-[9px] bg-amber-100 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold animate-pulse">
+                            <Loader className="w-2.5 h-2.5 animate-spin" /> Active
                           </span>
                         )}
                         {status === 'completed' && (
-                          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">
+                          <span className="text-[9px] bg-emerald-100 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">
                             Passed
                           </span>
                         )}
                         {status === 'failed' && (
-                          <span className="text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">
+                          <span className="text-[9px] bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">
                             Aborted
                           </span>
                         )}
                         {status === 'waiting' && (
-                          <span className="text-[10px] bg-slate-900 text-slate-600 px-2 py-0.5 rounded-full uppercase tracking-wider font-medium">
+                          <span className="text-[9px] bg-slate-50 text-slate-400 border border-slate-150 px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
                             Waiting
                           </span>
                         )}
                       </div>
                     </div>
-                    <p className={`text-xs mt-1 leading-relaxed ${status === 'active' ? 'text-slate-300' : 'text-slate-500'}`}>
+                    <p className={`text-[11px] mt-1 leading-relaxed ${status === 'active' ? 'text-slate-700 font-medium' : 'text-slate-500'}`}>
                       {step.description}
                     </p>
 
                     {/* Show iteration count when looping between Dev and QA Auditor */}
                     {status === 'active' && step.id === 'ENGINEER' && activeJob && activeJob.iterationCount > 0 && (
-                      <div className="mt-2.5 flex items-center gap-1.5 text-xs text-yellow-500 bg-yellow-500/10 border border-yellow-500/20 px-2.5 py-1 rounded-lg">
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-yellow-400" />
-                        <span className="font-semibold">Review Hand-off: Iteration {activeJob.iterationCount}</span>
+                      <div className="mt-2 flex items-center gap-1.5 text-[10px] text-amber-800 bg-amber-500/10 border border-amber-200 px-2 py-0.5 rounded">
+                        <RefreshCw className="w-3 h-3 animate-spin text-amber-600" />
+                        <span className="font-bold">Review Feedback: Iteration {activeJob.iterationCount}</span>
                       </div>
                     )}
                   </div>
@@ -198,14 +198,14 @@ export default function AgentPipeline({ activeJob }: { activeJob: Job | null }) 
 
       {/* Visual active Loop Indicator Banner */}
       {activeJob && (activeJob.status === 'ENGINEERING' || activeJob.status === 'REVIEWING') && (
-        <div className="mt-4 p-3.5 rounded-xl border border-yellow-500/20 bg-yellow-500/5 flex items-center gap-3 animate-pulse">
-          <RefreshCw className="w-5 h-5 text-yellow-500 spin shrink-0" />
-          <div className="text-left">
-            <div className="font-bold text-yellow-400 text-xs uppercase tracking-wider">
+        <div className="mt-4 p-3 rounded-xl border border-amber-300 bg-amber-500/5 flex items-center gap-3 animate-pulse text-left">
+          <RefreshCw className="w-4 h-4 text-amber-600 spin shrink-0" />
+          <div className="min-w-0">
+            <div className="font-extrabold text-amber-800 text-[10px] uppercase tracking-wider">
               Lead Dev ↔ QA Auditor Iteration Loop
             </div>
-            <div className="text-slate-400 text-[11px] leading-relaxed mt-0.5">
-              Refining code file syntax based on automatic static analysis and review verdicts.
+            <div className="text-slate-650 text-[11px] leading-relaxed mt-0.5">
+              Refining code file structures based on automatic checks and security parameters.
             </div>
           </div>
         </div>
@@ -213,11 +213,11 @@ export default function AgentPipeline({ activeJob }: { activeJob: Job | null }) 
 
       {/* Finished Summary Ticket Banner */}
       {activeJob?.status === 'COMPLETED' && (
-        <div className="mt-4 p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 text-center">
-          <p className="text-emerald-400 font-bold text-xs uppercase tracking-wider">
+        <div className="mt-4 p-3.5 rounded-xl border border-emerald-250 bg-emerald-500/5 text-center">
+          <p className="text-emerald-700 font-extrabold text-xs uppercase tracking-wider">
             🎉 Continuous Delivery Ready
           </p>
-          <p className="text-slate-400 text-[11px] mt-1 leading-relaxed">
+          <p className="text-slate-600 text-[11px] mt-1 leading-relaxed">
             All 5 agents have executed and committed the tasks. Build verification PASSED inside sandbox.
           </p>
         </div>
