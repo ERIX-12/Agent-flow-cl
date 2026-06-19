@@ -1,0 +1,6 @@
+{
+  "name": "AgentFlow CI",
+  "description": "An autonomous multi-agent developer platform containing five specialized AI agents (Planner, Engineer, Reviewer, Tester, and DocWriter) collaborating in a virtual Band room to deliver complete, reviewed, and fully tested feature PRs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
