@@ -5,7 +5,7 @@ import AgentPipeline from './components/AgentPipeline';
 import LiveAgentChat from './components/LiveAgentChat';
 import JobDetail from './components/JobDetail';
 import DashboardStats from './components/DashboardStats';
-import { Layers, Terminal, Server, Flame, Sparkles, FolderLock, Plus, Compass, Cpu, HelpCircle, ShieldAlert, CheckCircle, FileText, Play } from 'lucide-react';
+import { Layers, Terminal, Server, Flame, Sparkles, FolderLock, Plus, Compass, Cpu, HelpCircle, ShieldAlert, CheckCircle, FileText, Play, Sun, Moon } from 'lucide-react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -119,6 +119,25 @@ export default function App() {
   const [isDisconnected, setIsDisconnected] = useState(false);
   const [activeTab, setActiveTab] = useState<'runs' | 'agents' | 'docs'>('runs');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'FAILED'>('ALL');
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (darkMode) {
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
 
   // Sync general database stats and specific active job logs
   const fetchState = async () => {
@@ -331,6 +350,20 @@ export default function App() {
 
           {/* Right Status Indicator */}
           <div className="flex items-center gap-3">
+            {/* Dark Mode Toggle Button */}
+            <button
+              id="darkModeToggle"
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm focus:outline-none cursor-pointer"
+              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {darkMode ? (
+                <Sun className="w-4 h-4 text-amber-500" />
+              ) : (
+                <Moon className="w-4 h-4 text-indigo-500" />
+              )}
+            </button>
+
             {isDisconnected ? (
               <div className="flex items-center gap-1.5 text-xs text-rose-600 bg-rose-50 px-2.5 py-1.5 rounded-lg border border-rose-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
@@ -491,12 +524,12 @@ export default function App() {
           <div className="col-span-1 lg:col-span-8 xl:col-span-9 grid grid-cols-1 xl:grid-cols-12 gap-6 min-h-0">
             
             {/* Pipeline flow tracker */}
-            <div className="xl:col-span-5 h-full">
+            <div className="xl:col-span-5 h-auto xl:h-full min-h-[400px]">
               <AgentPipeline activeJob={selectedJob} />
             </div>
 
             {/* Code Workspaces & Output Tabs */}
-            <div className="xl:col-span-7 flex flex-col h-full space-y-6">
+            <div className="xl:col-span-7 flex flex-col h-auto xl:h-full min-h-[500px] space-y-6">
               
               {/* selected run summary card if ready */}
               {selectedJob ? (
@@ -576,7 +609,7 @@ export default function App() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
             {[
               {
                 id: "PLANNER",

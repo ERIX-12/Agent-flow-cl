@@ -1,1 +1,191 @@
 @import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+/* Global dark mode styling to override light backgrounds and borders beautifully */
+.dark {
+  color-scheme: dark;
+}
+
+/* Base styles for dark mode */
+.dark body {
+  background-color: #0b1120 !important; /* Extremely sophisticated rich dark slate */
+  color: #f1f5f9 !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #0b1120 !important; /* Page background override */
+}
+
+/* Standard Card Overrides */
+.dark .bg-white {
+  background-color: #111b2e !important; /* Rich obsidian deep blue/slate cardbg */
+  border-color: #1e293b !important;
+}
+
+.dark .border-slate-200, 
+.dark .border-slate-100, 
+.dark .border-slate-200\/60, 
+.dark .border-slate-200\/40,
+.dark .border-slate-200\/50,
+.dark .border-slate-100\/65 {
+  border-color: #1e293b !important; /* Subtle dark borders */
+}
+
+/* Navigation buttons & Headers */
+.dark header, .dark footer {
+  background-color: #111b2e !important;
+  border-color: #1e293b !important;
+}
+
+.dark nav.bg-slate-100 {
+  background-color: #080f1e !important;
+  border-color: #1e293b !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #080f1e !important;
+}
+
+.dark .bg-slate-50\/50 {
+  background-color: #111b2e !important;
+}
+
+/* Hover behaviors */
+.dark .hover\:bg-slate-50:hover, 
+.dark .hover\:bg-slate-100:hover {
+  background-color: #1e293b !important;
+}
+
+.dark .hover\:border-slate-300:hover {
+  border-color: #334155 !important;
+}
+
+/* Typography Dark Mode Color Mapping */
+.dark .text-slate-900, .dark .text-slate-950, .dark .text-amber-900, .dark .text-amber-955 {
+  color: #f8fafc !important; /* Clear bright readable headings */
+}
+
+.dark .text-slate-800 {
+  color: #e2e8f0 !important; /* Standard body text */
+}
+
+.dark .text-slate-700, .dark .text-slate-600 {
+  color: #cbd5e1 !important; /* Medium muted sub-labels */
+}
+
+.dark .text-slate-500, .dark .text-slate-400 {
+  color: #94a3b8 !important; /* Meta label states */
+}
+
+/* Form Fields and Inputs */
+.dark input, 
+.dark textarea, 
+.dark select {
+  background-color: #0b1120 !important;
+  color: #f1f5f9 !important;
+  border-color: #1e293b !important;
+}
+
+.dark input::placeholder, 
+.dark textarea::placeholder {
+  color: #475569 !important;
+}
+
+.dark input:focus, 
+.dark textarea:focus {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Code containers and Pre tags */
+.dark pre, .dark code {
+  background-color: #080f1e !important;
+  color: #38bdf8 !important; /* Cyan accented developer text */
+}
+
+/* Subtle highlights & containers */
+.dark .bg-amber-500\/5 {
+  background-color: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+.dark .text-amber-900, .dark .text-amber-805, .dark .text-amber-800, .dark .text-amber-708, .dark .text-amber-700 {
+  color: #fde047 !important; /* Yellow-amber highlight */
+}
+
+.dark .bg-slate-50 {
+  background-color: #0b1120 !important;
+}
+
+/* Chart Tooltip dark mode support */
+.dark .chart-tooltip, 
+.dark .recharts-default-tooltip {
+  background-color: #111b2e !important;
+  border-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* Active buttons and tabs */
+.dark .bg-white.text-amber-900 {
+  background-color: #111b2e !important;
+  color: #fbbf24 !important; /* Glowing amber active state selection */
+  border-color: #fbbf24 !important;
+}
+
+.dark .bg-white.text-amber-905, .dark .bg-white.text-amber-800 {
+  background-color: #1e293b !important;
+  color: #f59e0b !important;
+  border-color: #f59e0b !important;
+}
+
+/* Status state indicators */
+.dark .bg-emerald-50, .dark .text-emerald-800 {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.2) !important;
+}
+
+.dark .bg-rose-50, .dark .text-rose-600 {
+  background-color: rgba(244, 63, 94, 0.1) !important;
+  color: #fb7185 !important;
+  border-color: rgba(244, 63, 94, 0.2) !important;
+}
+
+.dark .bg-blue-50, .dark .text-blue-600 {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+  color: #60a5fa !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+.dark .bg-violet-50, .dark .text-violet-600 {
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  color: #a78bfa !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Force dark text inside charts to stay readable */
+.dark .recharts-cartesian-grid-horizontal line, 
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: #1e293b !important;
+}
+
+.dark .recharts-text {
+  fill: #94a3b8 !important;
+}
+
+/* Customize scrollbars so they match the sleek dark appearance */
+.dark *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dark *::-webkit-scrollbar-track {
+  background: #080f1e;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 9999px;
+}
+
