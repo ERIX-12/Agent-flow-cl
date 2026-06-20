@@ -34,7 +34,7 @@ This guide explains how to deploy this full-stack application with the **Fronten
 3. Keep the default **Vite** project configuration.
 4. Under the **Environment Variables** section, add:
    - **Key:** `VITE_API_URL`
-   - **Value:** `https://your-backend-name.onrender.com` *(Replace this with the actual URL copied from Render step 1, with no trailing slash)*
+   - **Value:** `https://agent-flow-cl.onrender.com` *(This is your active backend URL)*
 5. Click **Deploy**.
 
 ---
