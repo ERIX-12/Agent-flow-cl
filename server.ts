@@ -20,9 +20,22 @@ const resolvedDirname = (typeof import.meta !== "undefined" && import.meta.url)
   : (typeof __dirname !== "undefined" ? __dirname : process.cwd());
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
+
+// Enable robust CORS support for cross-origin requests (e.g. from a separate Vercel deploy)
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
+  // Handle preflight OPTIONS response immediately
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
 
 // Request logging middleware
 app.use((req, res, next) => {

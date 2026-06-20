@@ -17,6 +17,8 @@ import {
   Legend
 } from 'recharts';
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 const getElapsedTime = (job: Job): string | null => {
   if (job.status !== 'COMPLETED' && job.status !== 'FAILED') return null;
   const start = new Date(job.createdAt).getTime();
@@ -143,7 +145,7 @@ export default function App() {
   const fetchState = async () => {
     try {
       // 1. Fetch system parameter states
-      const systemRes = await fetch("/api/system/status");
+      const systemRes = await fetch(`${API_BASE}/api/system/status`);
       if (systemRes.ok) {
         const contentType = systemRes.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -154,7 +156,7 @@ export default function App() {
       }
 
       // 2. Fetch list of recent pipeline runs
-      const jobsRes = await fetch("/api/jobs");
+      const jobsRes = await fetch(`${API_BASE}/api/jobs`);
       if (jobsRes.ok) {
         const contentType = jobsRes.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -181,7 +183,7 @@ export default function App() {
   // Sync selected job details and its custom logs
   const fetchSelectedJobDetails = async (jobId: string) => {
     try {
-      const detailRes = await fetch(`/api/jobs/${jobId}`);
+      const detailRes = await fetch(`${API_BASE}/api/jobs/${jobId}`);
       if (detailRes.ok) {
         const contentType = detailRes.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
@@ -229,7 +231,7 @@ export default function App() {
   const handleJobSubmit = async (title: string, specDetails: string) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/jobs", {
+      const response = await fetch(`${API_BASE}/api/jobs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, featureRequest: specDetails }),
@@ -254,7 +256,7 @@ export default function App() {
   const handleReset = async () => {
     if (confirm("Are you sure you want to absolute reset the multi-agent job history?")) {
       try {
-        const response = await fetch("/api/reset", { method: "POST" });
+        const response = await fetch(`${API_BASE}/api/reset`, { method: "POST" });
         if (response.ok) {
           setJobs([]);
           setSelectedJob(null);

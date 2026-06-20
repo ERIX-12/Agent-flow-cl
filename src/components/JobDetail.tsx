@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Job } from '../types';
 import { FileText, Code, CheckSquare, ShieldAlert, Award, Terminal, Copy, Check, Eye, RotateCw } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 interface JobDetailProps {
   job: Job;
   onRetry?: () => void;
@@ -15,7 +17,7 @@ export default function JobDetail({ job, onRetry }: JobDetailProps) {
   const handleRetry = async () => {
     setIsRetrying(true);
     try {
-      const res = await fetch(`/api/jobs/${job.id}/retry`, {
+      const res = await fetch(`${API_BASE}/api/jobs/${job.id}/retry`, {
         method: "POST"
       });
       if (res.ok) {
